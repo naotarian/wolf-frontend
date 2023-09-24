@@ -16,7 +16,6 @@ export default function Form() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
-
     const url = '/login'
     const baseUrl = process.browser
       ? process.env.NEXT_PUBLIC_API_ROOT
@@ -31,6 +30,7 @@ export default function Form() {
         password: data.get('password'),
       }),
     })
+    if (res.status === 200 || res.status === 204) window.location.pathname = '/'
   }
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>

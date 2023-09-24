@@ -2,16 +2,17 @@
 import React, { useState, useEffect } from 'react'
 import Pusher from 'pusher-js'
 
-const pusher = new Pusher('165e661ad8f22889f643', {
-  cluster: 'ap3',
+const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
+  cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
 })
+console.log(pusher.subscribe('my-channel'))
 const Notifications = () => {
   const [notifications, setNotifications] = useState<Array<string>>([])
 
   useEffect(() => {
     const channel = pusher.subscribe('my-channel')
-
-    channel.bind('my-event', data => {
+    channel.bind('my-event', (data: string) => {
+      console.log('my-event' + data)
       setNotifications([...notifications, data])
     })
 
@@ -24,8 +25,8 @@ const Notifications = () => {
     <div>
       <h2>Notifications</h2>
       <ul>
-        {notifications.map(notification => (
-          <li key={notification}>{notification}</li>
+        {notifications.map((notification, index) => (
+          <li key={index}>{notification.message}</li>
         ))}
       </ul>
     </div>

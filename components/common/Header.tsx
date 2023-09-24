@@ -10,8 +10,6 @@ import InputBase from '@mui/material/InputBase'
 import Badge from '@mui/material/Badge'
 import MenuItem from '@mui/material/MenuItem'
 import Menu from '@mui/material/Menu'
-import MenuIcon from '@mui/icons-material/Menu'
-import SearchIcon from '@mui/icons-material/Search'
 import AccountCircle from '@mui/icons-material/AccountCircle'
 import MailIcon from '@mui/icons-material/Mail'
 import NotificationsIcon from '@mui/icons-material/Notifications'
@@ -58,6 +56,25 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }))
 
 export default function Header() {
+  const [user, setUser] = React.useState(null)
+  React.useEffect(() => {
+    ;(async () => {
+      const url = '/user'
+      const baseUrl = process.browser
+        ? process.env.NEXT_PUBLIC_API_ROOT
+        : process.env.NEXT_PUBLIC_API_ROOT_LOCAL
+      const res = await fetch(baseUrl + url, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        cache: 'no-store',
+      })
+      const user = await res.json()
+      setUser(user)
+    })()
+  }, [])
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
     React.useState<null | HTMLElement>(null)
@@ -82,6 +99,20 @@ export default function Header() {
     setMobileMoreAnchorEl(event.currentTarget)
   }
 
+  const logout = async () => {
+    const url = '/logout'
+    const baseUrl = process.browser
+      ? process.env.NEXT_PUBLIC_API_ROOT
+      : process.env.NEXT_PUBLIC_API_ROOT_LOCAL
+    await fetch(baseUrl + url, {
+      method: 'POST',
+      cache: 'no-store',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    window.location.pathname = '/login'
+  }
+
   const menuId = 'primary-search-account-menu'
   const renderMenu = (
     <Menu
@@ -98,7 +129,12 @@ export default function Header() {
       }}
       open={isMenuOpen}
       onClose={handleMenuClose}>
-      <MenuItem onClick={handleMenuClose}>マイページ</MenuItem>
+      {user && (
+        <div>
+          <MenuItem onClick={handleMenuClose}>マイページ</MenuItem>
+          <MenuItem onClick={logout}>ログアウト</MenuItem>
+        </div>
+      )}
     </Menu>
   )
 

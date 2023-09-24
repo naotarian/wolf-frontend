@@ -17,24 +17,10 @@ export default function Form(props: {
   }
 }) {
   const { user } = props
-  useEffect(() => {
-    ;(async () => {
-      console.log('jj')
-      const res = await fetch('http://127.0.0.190/api/user')
-      console.log(res)
-    })()
-  }, [])
   const [selectCharacter, setSelectCharacter] = useState<number>(1)
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
-    console.log({
-      email: data.get('email'),
-      user_name: data.get('user_name'),
-      password: data.get('password'),
-      password_confirmed: data.get('password_confirmed'),
-      character: selectCharacter,
-    })
     if (!data.get('user_name')) return
     if (!data.get('password')) return
     if (!data.get('password_confirmed')) return
