@@ -5,8 +5,10 @@ import RadioGroup from '@mui/material/RadioGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import FormControl from '@mui/material/FormControl'
 import type { User } from '@/types/common/User'
+import { useRouter } from 'next/navigation'
 export default function Form(props: { user: User }) {
   const { user } = props
+  const router = useRouter()
   const submit = async () => {
     const url = '/rooms/create'
     const baseUrl = process.browser
@@ -21,6 +23,8 @@ export default function Form(props: { user: User }) {
         user_id: user.id,
       }),
     })
+    const room = await res.json()
+    router.push(`/room/${room.roomId}`)
   }
   return (
     <Paper className="p-4 w-6/12 my-1 mx-auto rounded-none">
