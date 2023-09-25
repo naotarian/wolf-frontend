@@ -10,7 +10,11 @@ export const auth = async () => {
       },
       cache: 'no-store',
     }
-    const res = await fetch('http://wolf-web/api/user', options)
+    const url = '/user'
+    const baseUrl = process.browser
+      ? process.env.NEXT_PUBLIC_API_ROOT
+      : process.env.NEXT_PUBLIC_API_ROOT_LOCAL
+    const res = await fetch(baseUrl + url, options)
     if (res.status === 401) redirect('/login')
     const test = await res.json()
     return test
@@ -28,7 +32,11 @@ export const guest = async () => {
     },
     cache: 'no-store',
   }
-  const res = await fetch('http://wolf-web/api/user', options)
+  const url = '/user'
+  const baseUrl = process.browser
+    ? process.env.NEXT_PUBLIC_API_ROOT
+    : process.env.NEXT_PUBLIC_API_ROOT_LOCAL
+  const res = await fetch(baseUrl + url, options)
   if (res.status !== 401) redirect('/')
   const test = await res.json()
   return test

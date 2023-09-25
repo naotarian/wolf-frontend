@@ -1,11 +1,9 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import Pusher from 'pusher-js'
-
 const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
   cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
 })
-console.log(pusher.subscribe('my-channel'))
 const Notifications = () => {
   const [notifications, setNotifications] = useState<Array<string>>([])
 
