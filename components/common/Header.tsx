@@ -191,14 +191,16 @@ export default function Header() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <Typography
-            variant="h2"
-            noWrap
-            component="div"
-            className="text-white"
-            sx={{ display: { xs: 'none', sm: 'block' } }}>
-            人狼村
-          </Typography>
+          <a href="/">
+            <Typography
+              variant="h2"
+              noWrap
+              component="div"
+              className="text-white"
+              sx={{ display: { xs: 'none', sm: 'block' } }}>
+              人狼村
+            </Typography>
+          </a>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
             <IconButton
