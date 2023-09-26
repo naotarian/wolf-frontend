@@ -1,10 +1,10 @@
 import { auth } from '@/functions/common/auth'
 import { redirect } from 'next/navigation'
 import Room from '@/app/room/[id]/Room'
-
 export default async function Home({ params }: { params: { id: string } }) {
   const user = await auth()
   const roomId = params.id
+
   // const url = '/room/participation'
   // const baseUrl = process.browser
   //   ? process.env.NEXT_PUBLIC_API_ROOT

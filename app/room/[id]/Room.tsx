@@ -4,43 +4,51 @@ import Image from 'next/image'
 import { Button, Paper, Typography } from '@mui/material'
 import Pusher from 'pusher-js'
 import { useRouter } from 'next/navigation'
+import PlayerInformationModal from '@/app/room/[id]/PlayerInformationModal'
 export default function Room(props: { userId: string; roomId: string }) {
   const router = useRouter()
   const { userId, roomId } = props
+  const [playerInformationModalOpen, setPlayerInformationModalOpen] =
+    useState<boolean>(false)
+  const [selectedPlayer, setSelectedPlayer] = useState<{
+    name: string
+    id: string
+    character_id: number
+  }>({ name: '', id: '', character_id: 0 })
   const [users, setUsers] = useState<
     Array<{ name: string; id: string; character_id: number }>
   >([])
+  const [pusherI, setPusherI] = useState<Pusher>()
   const [roomMasterId, setRoomMasterId] = useState<string>('')
-  const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
-    cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
-  })
-  useLayoutEffect(() => {
+  useEffect(() => {
+    setPusherI(
+      new Pusher(String(process.env.NEXT_PUBLIC_PUSHER_KEY), {
+        cluster: String(process.env.NEXT_PUBLIC_PUSHER_CLUSTER),
+      }),
+    )
+    return () => {
+      //アンマウント時にチャンネル購読を辞める
+      if (!pusherI) return
+      pusherI.unsubscribe(`room${roomId}-channel`)
+    }
+  }, [])
+  useEffect(() => {
     ;(async () => {
-      const channel = pusher.subscribe(`room${roomId}-channel`)
+      if (!pusherI) return
+      const channel = pusherI.subscribe(`room${roomId}-channel`)
       channel.bind(
         `room${roomId}-event`,
         (data: {
           users: Array<{ id: string; name: string; character_id: number }>
         }) => {
-          console.log('接続1')
           const exist = data.users.find(e => e.id === userId)
           if (!exist) {
-            console.log('切断1')
-            pusher.unsubscribe(`room${roomId}-channel`)
+            pusherI.unsubscribe(`room${roomId}-channel`)
             router.push('/')
           }
           setUsers(data.users)
         },
       )
-    })()
-    return () => {
-      //アンマウント時にチャンネル購読を辞める
-      console.log('切断アンマウント')
-      pusher.unsubscribe(`room${roomId}-channel`)
-    }
-  }, [])
-  useEffect(() => {
-    ;(async () => {
       const url = '/room/participation'
       const baseUrl = process.browser
         ? process.env.NEXT_PUBLIC_API_ROOT
@@ -58,7 +66,7 @@ export default function Room(props: { userId: string; roomId: string }) {
       const room = await res.json()
       setRoomMasterId(room.master_user_id)
     })()
-  }, [])
+  }, [pusherI])
   const leaving = async () => {
     const url = '/room/leaving'
     const baseUrl = process.browser
@@ -78,8 +86,6 @@ export default function Room(props: { userId: string; roomId: string }) {
   }
 
   const dissolution = async () => {
-    console.log('切断0')
-    pusher.unsubscribe(`room${roomId}-channel`)
     const url = '/room/dissolution'
     const baseUrl = process.browser
       ? process.env.NEXT_PUBLIC_API_ROOT
@@ -96,7 +102,7 @@ export default function Room(props: { userId: string; roomId: string }) {
     })
     router.push('/')
   }
-
+  if (!pusherI) return <div></div>
   return (
     <div className="h-screen">
       {roomMasterId && (
@@ -107,7 +113,11 @@ export default function Room(props: { userId: string; roomId: string }) {
                 <Typography variant="body1" className="text-white">
                   {index + 1}.{data.name}
                 </Typography>
-                <Button>
+                <Button
+                  onClick={() => {
+                    setSelectedPlayer(data)
+                    setPlayerInformationModalOpen(true)
+                  }}>
                   <Image
                     src={`/images/characters/No${data.character_id}.jpg`}
                     alt="Picture of the author"
@@ -142,6 +152,11 @@ export default function Room(props: { userId: string; roomId: string }) {
           </Paper>
         </div>
       )}
+      <PlayerInformationModal
+        playerInformationModalOpen={playerInformationModalOpen}
+        setPlayerInformationModalOpen={setPlayerInformationModalOpen}
+        selectedPlayer={selectedPlayer}
+      />
     </div>
   )
 }
