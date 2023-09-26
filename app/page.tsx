@@ -10,7 +10,6 @@ export default async function Home() {
         <a
           href="/rooms/create"
           className="group rounded-none border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-[#a1080f]"
-          target="_blank"
           rel="noopener noreferrer">
           <h2 className={`mb-3 text-2xl font-semibold text-white`}>
             ルーム作成

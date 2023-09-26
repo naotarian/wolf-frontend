@@ -13,18 +13,27 @@ export default function Room(props: { userId: string; roomId: string }) {
     cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
   })
   useLayoutEffect(() => {
-    const channel = pusher.subscribe(`room${roomId}-channel`)
-    channel.bind(
-      `room${roomId}-event`,
-      (data: { users: Array<{ id: string; name: string }> }) => {
-        const exist = data.users.find(e => e.id === userId)
-        if (!exist) {
-          pusher.unsubscribe(`room${roomId}-channel`)
-          router.push('/')
-        }
-        setUsers(data.users)
-      },
-    )
+    ;(async () => {
+      const channel = pusher.subscribe(`room${roomId}-channel`)
+      channel.bind(
+        `room${roomId}-event`,
+        (data: { users: Array<{ id: string; name: string }> }) => {
+          console.log('接続1')
+          const exist = data.users.find(e => e.id === userId)
+          if (!exist) {
+            console.log('切断1')
+            pusher.unsubscribe(`room${roomId}-channel`)
+            router.push('/')
+          }
+          setUsers(data.users)
+        },
+      )
+    })()
+    return () => {
+      //アンマウント時にチャンネル購読を辞める
+      console.log('切断アンマウント')
+      pusher.unsubscribe(`room${roomId}-channel`)
+    }
   }, [])
   useEffect(() => {
     ;(async () => {
@@ -44,11 +53,6 @@ export default function Room(props: { userId: string; roomId: string }) {
       })
       const room = await res.json()
       setRoomMasterId(room.master_user_id)
-      return () => {
-        alert('unsubscribe')
-        pusher.unsubscribe(`room${roomId}-channel`)
-        leaving()
-      }
     })()
   }, [])
   const leaving = async () => {
