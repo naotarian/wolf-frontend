@@ -8,9 +8,19 @@ import TableContainer from '@mui/material/TableContainer'
 import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
-import { Button, TableHead } from '@mui/material'
-
-export default function EnhancedTable(props: { list: Array<{ id: string }> }) {
+import { Button, TableHead, Typography } from '@mui/material'
+import Avatar from '@mui/material/Avatar'
+export default function EnhancedTable(props: {
+  list: Array<{
+    id: string
+    master_user_id: string
+    room_master: {
+      id: string
+      name: string
+      character_id: number
+    }
+  }>
+}) {
   const { list } = props
   console.log(list)
   const [selected, setSelected] = React.useState<readonly string[]>([])
@@ -67,10 +77,28 @@ export default function EnhancedTable(props: { list: Array<{ id: string }> }) {
               {visibleRows.map(row => {
                 return (
                   <TableRow hover key={row.id} sx={{ cursor: 'pointer' }}>
-                    <TableCell align="center">test</TableCell>
-                    <TableCell align="center">10人</TableCell>
-                    <TableCell align="center">超人気</TableCell>
-                    <TableCell align="center">初心者OK</TableCell>
+                    <TableCell align="center">
+                      <div className="flex gap-4 my-0 mx-auto w-fit	items-center">
+                        <Avatar
+                          alt="Remy Sharp"
+                          className="border"
+                          sx={{ width: 48, height: 48 }}
+                          src={`/images/characters/No${row.room_master.character_id}.jpg`}
+                        />
+                        <Typography variant="body1">
+                          {row.room_master.name}
+                        </Typography>
+                      </div>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography variant="body1">10人</Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography variant="body1">超人気</Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography variant="body1">初心者OK</Typography>
+                    </TableCell>
                     <TableCell align="center">
                       <Button
                         variant="contained"

@@ -15,8 +15,10 @@ export default function Form(props: {
     id: string
     email: string
   }
+  characterFiles: Array<string>
 }) {
-  const { user } = props
+  const { user, characterFiles } = props
+
   const [selectCharacter, setSelectCharacter] = useState<number>(1)
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -122,10 +124,10 @@ export default function Form(props: {
               キャラクターの選択
             </Typography>
             <div className="flex flex-wrap gap-4">
-              {[...Array(10)].map((data, index) => (
+              {characterFiles.map((data, index) => (
                 <Button onClick={() => setSelectCharacter(index + 1)}>
                   <Image
-                    src="/images/characters/No1.png"
+                    src={`/images/characters/${data}`}
                     alt="Picture of the author"
                     width={100}
                     height={100}

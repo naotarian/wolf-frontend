@@ -22,10 +22,17 @@ export default async function SignUp({
     }),
   })
   const user = await res.json()
+  const glob = require('glob')
+  const characters = glob.sync('/app/public/images/characters/*')
+  const characterFiles = characters.map(file => {
+    return file.split('/').pop()
+  })
 
   return (
     <Container component="main" maxWidth="md">
-      {user.email !== undefined && <Form user={user} />}
+      {user.email !== undefined && (
+        <Form user={user} characterFiles={characterFiles} />
+      )}
       {user.email === undefined && <div>もう一度仮登録してください</div>}
     </Container>
   )
