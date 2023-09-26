@@ -7,7 +7,9 @@ import { useRouter } from 'next/navigation'
 export default function Room(props: { userId: string; roomId: string }) {
   const router = useRouter()
   const { userId, roomId } = props
-  const [users, setUsers] = useState<Array<{ name: string; id: string }>>([])
+  const [users, setUsers] = useState<
+    Array<{ name: string; id: string; character_id: number }>
+  >([])
   const [roomMasterId, setRoomMasterId] = useState<string>('')
   const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
     cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
@@ -17,7 +19,9 @@ export default function Room(props: { userId: string; roomId: string }) {
       const channel = pusher.subscribe(`room${roomId}-channel`)
       channel.bind(
         `room${roomId}-event`,
-        (data: { users: Array<{ id: string; name: string }> }) => {
+        (data: {
+          users: Array<{ id: string; name: string; character_id: number }>
+        }) => {
           console.log('接続1')
           const exist = data.users.find(e => e.id === userId)
           if (!exist) {
@@ -74,6 +78,8 @@ export default function Room(props: { userId: string; roomId: string }) {
   }
 
   const dissolution = async () => {
+    console.log('切断0')
+    pusher.unsubscribe(`room${roomId}-channel`)
     const url = '/room/dissolution'
     const baseUrl = process.browser
       ? process.env.NEXT_PUBLIC_API_ROOT
@@ -103,7 +109,7 @@ export default function Room(props: { userId: string; roomId: string }) {
                 </Typography>
                 <Button>
                   <Image
-                    src="/images/characters/No1.png"
+                    src={`/images/characters/No${data.character_id}.jpg`}
                     alt="Picture of the author"
                     width={100}
                     height={100}
