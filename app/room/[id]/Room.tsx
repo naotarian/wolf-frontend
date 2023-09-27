@@ -1,10 +1,17 @@
 'use client'
-import React, { useState, useEffect, useLayoutEffect } from 'react'
+
+import React, { useState, useEffect } from 'react'
+
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+
 import { Button, Paper, Typography } from '@mui/material'
 import Pusher from 'pusher-js'
-import { useRouter } from 'next/navigation'
+
+import Audio from '@/app/Audio'
 import PlayerInformationModal from '@/app/room/[id]/PlayerInformationModal'
+import { leavingHook, dissolutionHook } from '@/functions/room/roomAction'
+
 export default function Room(props: { userId: string; roomId: string }) {
   const router = useRouter()
   const { userId, roomId } = props
@@ -20,6 +27,7 @@ export default function Room(props: { userId: string; roomId: string }) {
   >([])
   const [pusherI, setPusherI] = useState<Pusher>()
   const [roomMasterId, setRoomMasterId] = useState<string>('')
+  const [voiceOnUser, setVoiceOnUser] = useState<Array<string>>([])
   useEffect(() => {
     setPusherI(
       new Pusher(String(process.env.NEXT_PUBLIC_PUSHER_KEY), {
@@ -27,7 +35,7 @@ export default function Room(props: { userId: string; roomId: string }) {
       }),
     )
     return () => {
-      //アンマウント時にチャンネル購読を辞める
+      // アンマウント時にチャンネル購読を辞める
       if (!pusherI) return
       pusherI.unsubscribe(`room${roomId}-channel`)
     }
@@ -49,6 +57,12 @@ export default function Room(props: { userId: string; roomId: string }) {
           setUsers(data.users)
         },
       )
+      channel.bind(
+        `room-voice-${roomId}-event`,
+        (data: { voice_user_id: Array<string> }) => {
+          setVoiceOnUser(data.voice_user_id)
+        },
+      )
       const url = '/room/participation'
       const baseUrl = process.browser
         ? process.env.NEXT_PUBLIC_API_ROOT
@@ -60,57 +74,38 @@ export default function Room(props: { userId: string; roomId: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user: userId,
-          roomId: roomId,
+          roomId,
         }),
       })
       const room = await res.json()
       setRoomMasterId(room.master_user_id)
     })()
   }, [pusherI])
+  // 退室処理
   const leaving = async () => {
-    const url = '/room/leaving'
-    const baseUrl = process.browser
-      ? process.env.NEXT_PUBLIC_API_ROOT
-      : process.env.NEXT_PUBLIC_API_ROOT_LOCAL
-    await fetch(baseUrl + url, {
-      method: 'POST',
-      cache: 'no-store',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: userId,
-        roomId: roomId,
-      }),
-    })
+    await leavingHook(userId, roomId)
     router.push('/')
   }
-
+  // 部屋を解散
   const dissolution = async () => {
-    const url = '/room/dissolution'
-    const baseUrl = process.browser
-      ? process.env.NEXT_PUBLIC_API_ROOT
-      : process.env.NEXT_PUBLIC_API_ROOT_LOCAL
-    await fetch(baseUrl + url, {
-      method: 'POST',
-      cache: 'no-store',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: userId,
-        roomId: roomId,
-      }),
-    })
+    await dissolutionHook(userId, roomId)
     router.push('/')
   }
-  if (!pusherI) return <div></div>
+  if (!pusherI) return <div />
   return (
     <div className="h-screen">
       {roomMasterId && (
         <div>
           <div className="grid grid-cols-4 gap-4 min-h-[50%]">
             {users.map((data, index) => (
-              <div className="text-center" key={index}>
-                <Typography variant="body1" className="text-white">
+              <div className="text-center" key={data.name}>
+                <Typography
+                  variant="body1"
+                  className={`${
+                    voiceOnUser.includes(data.id)
+                      ? 'text-[#a1080f]'
+                      : 'text-white'
+                  }`}>
                   {index + 1}.{data.name}
                 </Typography>
                 <Button
@@ -124,7 +119,9 @@ export default function Room(props: { userId: string; roomId: string }) {
                     width={100}
                     height={100}
                     priority={false}
-                    className={`border mx-auto`}
+                    className={`border-2 mx-auto ${
+                      voiceOnUser.includes(data.id) ? 'border-[#a1080f]' : ''
+                    }`}
                   />
                 </Button>
               </div>
@@ -142,7 +139,7 @@ export default function Room(props: { userId: string; roomId: string }) {
               <Button
                 variant="outlined"
                 className="rounded-none"
-                onClick={leaving}>
+                onClick={() => leaving()}>
                 退室する
               </Button>
             )}
@@ -150,12 +147,24 @@ export default function Room(props: { userId: string; roomId: string }) {
               ゲーム開始
             </Button>
           </Paper>
+          <Paper className="w-96 my-3 mx-auto p-2 rounded-none flex justify-between">
+            <Audio
+              voiceOnUser={voiceOnUser}
+              setVoiceOnUser={setVoiceOnUser}
+              userId={userId}
+              roomId={roomId}
+            />
+          </Paper>
         </div>
       )}
       <PlayerInformationModal
         playerInformationModalOpen={playerInformationModalOpen}
         setPlayerInformationModalOpen={setPlayerInformationModalOpen}
         selectedPlayer={selectedPlayer}
+        setSelectedPlayer={setSelectedPlayer}
+        roomMasterId={roomMasterId}
+        userId={userId}
+        roomId={roomId}
       />
     </div>
   )

@@ -1,5 +1,7 @@
 import * as React from 'react'
+
 import Container from '@mui/material/Container'
+
 import Form from '@/app/(auth)/register/definitive/Parts/Form'
 
 export default async function SignUp({
@@ -24,9 +26,7 @@ export default async function SignUp({
   const user = await res.json()
   const glob = require('glob')
   const characters = glob.sync('/app/public/images/characters/*')
-  const characterFiles = characters.map(file => {
-    return file.split('/').pop()
-  })
+  const characterFiles = characters.map(file => file.split('/').pop())
 
   return (
     <Container component="main" maxWidth="md">

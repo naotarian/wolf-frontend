@@ -1,45 +1,24 @@
 'use client'
+
+import { useState } from 'react'
+
+import { useRouter } from 'next/navigation'
+
 import { Paper, Typography, TextField, Button } from '@mui/material'
+
+import FormControl from '@mui/material/FormControl'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import FormControl from '@mui/material/FormControl'
+
 import type { User } from '@/types/common/User'
-import { useRouter } from 'next/navigation'
-import { useState, useEffect, useLayoutEffect } from 'react'
-import { useLeavePageConfirmation } from '@/hooks/useLeavePageConfirmation '
+
+import VideoView from '@/app/Audio'
+
 export default function Form(props: { user: User }) {
   const { user } = props
-  // useLeavePageConfirmation('test')
   const router = useRouter()
-  useLayoutEffect(() => {
-    ;(async () => {
-      const res = await fetch('https://api.thecatapi.com/v1/images/search')
-      const images = await res.json()
-      console.log('useLayoutEffect')
-    })()
-    return () => {
-      console.log('un-mount-useLayoutEffect')
-    }
-  }, [])
-  useEffect(() => {
-    // ;(async () => {
-    //   const res = await fetch('https://api.thecatapi.com/v1/images/search')
-    //   const images = await res.json()
-    //   console.log('useEffect')
-    // })()
-    console.log('useEffect')
-    return () => {
-      console.log('un-mount-useEffect')
-    }
-  }, [])
   const [text, setText] = useState<string>('')
-  const test = async () => {
-    console.log('test')
-    const res = await fetch('https://api.thecatapi.com/v1/images/search')
-    const images = await res.json()
-    router.push('/')
-  }
   const submit = async () => {
     const url = '/rooms/create'
     const baseUrl = process.browser
@@ -52,7 +31,7 @@ export default function Form(props: { user: User }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         userId: user.id,
-        text: text,
+        text,
       }),
     })
     const room = await res.json()
@@ -62,6 +41,7 @@ export default function Form(props: { user: User }) {
     <Paper className="p-4 w-6/12 my-1 mx-auto rounded-none">
       <div className="">
         <div className="my-2">
+          <VideoView />
           <Typography
             variant="body1"
             className={`before:content-['■'] text-[#a1080f] font-bold`}>

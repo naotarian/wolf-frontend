@@ -1,5 +1,7 @@
 'use client'
+
 import { useState } from 'react'
+
 import { Button, TextField, Paper, Typography } from '@mui/material'
 
 export default function TestPusher() {
@@ -15,7 +17,7 @@ export default function TestPusher() {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        text: text,
+        text,
       }),
     })
   }

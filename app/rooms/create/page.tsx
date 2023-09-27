@@ -1,5 +1,5 @@
-import { auth } from '@/functions/common/auth'
 import Form from '@/app/rooms/create/Form'
+import { auth } from '@/functions/common/auth'
 
 export default async function Home() {
   const user = await auth()

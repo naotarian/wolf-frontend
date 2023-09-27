@@ -1,15 +1,19 @@
 'use client'
+
 import * as React from 'react'
+
+import { Button, TableHead, Typography } from '@mui/material'
+
+import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
+import Paper from '@mui/material/Paper'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
-import { Button, TableHead, Typography } from '@mui/material'
-import Avatar from '@mui/material/Avatar'
+
 export default function EnhancedTable(props: {
   list: Array<{
     id: string
@@ -22,8 +26,6 @@ export default function EnhancedTable(props: {
   }>
 }) {
   const { list } = props
-  console.log(list)
-  const [selected, setSelected] = React.useState<readonly string[]>([])
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
 
@@ -74,42 +76,40 @@ export default function EnhancedTable(props: {
               </TableRow>
             </TableHead>
             <TableBody>
-              {visibleRows.map(row => {
-                return (
-                  <TableRow hover key={row.id} sx={{ cursor: 'pointer' }}>
-                    <TableCell align="center">
-                      <div className="flex gap-4 my-0 mx-auto w-fit	items-center">
-                        <Avatar
-                          alt="Remy Sharp"
-                          className="border"
-                          sx={{ width: 48, height: 48 }}
-                          src={`/images/characters/No${row.room_master.character_id}.jpg`}
-                        />
-                        <Typography variant="body1">
-                          {row.room_master.name}
-                        </Typography>
-                      </div>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="body1">10人</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="body1">超人気</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="body1">初心者OK</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant="contained"
-                        className="rounded-none"
-                        href={`/room/${row.id}`}>
-                        入室
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
+              {visibleRows.map(row => (
+                <TableRow hover key={row.id} sx={{ cursor: 'pointer' }}>
+                  <TableCell align="center">
+                    <div className="flex gap-4 my-0 mx-auto w-fit	items-center">
+                      <Avatar
+                        alt="Remy Sharp"
+                        className="border"
+                        sx={{ width: 48, height: 48 }}
+                        src={`/images/characters/No${row.room_master.character_id}.jpg`}
+                      />
+                      <Typography variant="body1">
+                        {row.room_master.name}
+                      </Typography>
+                    </div>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Typography variant="body1">10人</Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Typography variant="body1">超人気</Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Typography variant="body1">初心者OK</Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant="contained"
+                      className="rounded-none"
+                      href={`/room/${row.id}`}>
+                      入室
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
               {emptyRows > 0 && (
                 <TableRow
                   style={{

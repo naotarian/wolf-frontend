@@ -1,17 +1,20 @@
 'use client'
+
 import * as React from 'react'
+
 import Avatar from '@mui/material/Avatar'
+import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import CssBaseline from '@mui/material/CssBaseline'
-import TextField from '@mui/material/TextField'
-import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Grid from '@mui/material/Grid'
 import Link from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
-import Box from '@mui/material/Box'
-import Grid from '@mui/material/Grid'
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
+import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
+
 export default function Form() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -105,13 +108,13 @@ export default function Form() {
             </Button>
             <Grid container>
               <Grid item xs>
-                <Link href="#" variant="body2">
+                <Link href="/" variant="body2">
                   Forgot password?
                 </Link>
               </Grid>
               <Grid item>
                 <Link href="/register/temporary" variant="body2">
-                  {"Don't have an account? Sign Up"}
+                  have an account? Sign Up
                 </Link>
               </Grid>
             </Grid>

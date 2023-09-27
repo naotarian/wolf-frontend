@@ -1,15 +1,21 @@
 'use client'
-import { useState, useEffect } from 'react'
-import Avatar from '@mui/material/Avatar'
-import Button from '@mui/material/Button'
+
+import { useState } from 'react'
+
 import Image from 'next/image'
-import TextField from '@mui/material/TextField'
-import Link from '@mui/material/Link'
-import Grid from '@mui/material/Grid'
+
+import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
+import Button from '@mui/material/Button'
+import Grid from '@mui/material/Grid'
+import Link from '@mui/material/Link'
+import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
+
 import theme from '@/components/common/theme'
+
 export default function Form(props: {
   user: {
     id: string
@@ -43,8 +49,7 @@ export default function Form(props: {
         character: selectCharacter,
       }),
     })
-    const exec = await res.json()
-    console.log(exec)
+    await res.json()
   }
   return (
     <Box

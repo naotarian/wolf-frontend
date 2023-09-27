@@ -1,5 +1,5 @@
-import { auth } from '@/functions/common/auth'
 import List from '@/app/rooms/list/List'
+import { auth } from '@/functions/common/auth'
 
 export default async function Home() {
   const user = await auth()
