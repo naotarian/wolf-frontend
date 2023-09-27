@@ -13,8 +13,6 @@ import RadioGroup from '@mui/material/RadioGroup'
 
 import type { User } from '@/types/common/User'
 
-import VideoView from '@/app/Audio'
-
 export default function Form(props: { user: User }) {
   const { user } = props
   const router = useRouter()
@@ -41,7 +39,6 @@ export default function Form(props: { user: User }) {
     <Paper className="p-4 w-6/12 my-1 mx-auto rounded-none">
       <div className="">
         <div className="my-2">
-          <VideoView />
           <Typography
             variant="body1"
             className={`before:content-['■'] text-[#a1080f] font-bold`}>
