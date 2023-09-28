@@ -8,14 +8,17 @@ import { useRouter } from 'next/navigation'
 import { Button, Paper, Typography } from '@mui/material'
 import Pusher from 'pusher-js'
 
-import Audio from '@/app/Audio'
+import AudioI from '@/app/Audio'
 import PlayerInformationModal from '@/app/room/[id]/PlayerInformationModal'
+import PositionSelectModal from '@/app/room/[id]/PositionSelectModal'
 import { leavingHook, dissolutionHook } from '@/functions/room/roomAction'
 
 export default function Room(props: { userId: string; roomId: string }) {
   const router = useRouter()
   const { userId, roomId } = props
   const [playerInformationModalOpen, setPlayerInformationModalOpen] =
+    useState<boolean>(false)
+  const [positionSelectModalOpen, setPositionSelectModalOpen] =
     useState<boolean>(false)
   const [selectedPlayer, setSelectedPlayer] = useState<{
     name: string
@@ -28,7 +31,10 @@ export default function Room(props: { userId: string; roomId: string }) {
   const [pusherI, setPusherI] = useState<Pusher>()
   const [roomMasterId, setRoomMasterId] = useState<string>('')
   const [voiceOnUser, setVoiceOnUser] = useState<Array<string>>([])
+  const [phase, setPhase] = useState<number>(0)
+
   useEffect(() => {
+    console.log('ousher')
     setPusherI(
       new Pusher(String(process.env.NEXT_PUBLIC_PUSHER_KEY), {
         cluster: String(process.env.NEXT_PUBLIC_PUSHER_CLUSTER),
@@ -40,6 +46,17 @@ export default function Room(props: { userId: string; roomId: string }) {
       pusherI.unsubscribe(`room${roomId}-channel`)
     }
   }, [])
+  // useEffect(() => {
+  //   if (phase !== 1) return
+  //   const sampleInterval = setInterval(() => {
+  //     if (secs > 0) {
+  //       setSeconds(secs - 1)
+  //     }
+  //   }, 1000)
+  //   return () => {
+  //     clearInterval(sampleInterval)
+  //   }
+  // }, [phase])
   useEffect(() => {
     ;(async () => {
       if (!pusherI) return
@@ -61,6 +78,14 @@ export default function Room(props: { userId: string; roomId: string }) {
         `room-voice-${roomId}-event`,
         (data: { voice_user_id: Array<string> }) => {
           setVoiceOnUser(data.voice_user_id)
+        },
+      )
+      channel.bind(
+        `room-phase-${roomId}-event`,
+        (data: { roomId: string; phase: number }) => {
+          console.log(data)
+          setPhase(data.phase)
+          setPositionSelectModalOpen(data.phase === 1)
         },
       )
       const url = '/room/participation'
@@ -90,6 +115,28 @@ export default function Room(props: { userId: string; roomId: string }) {
   const dissolution = async () => {
     await dissolutionHook(userId, roomId)
     router.push('/')
+  }
+  const gameStart = async () => {
+    const url = '/room/pre_start'
+    const baseUrl = process.browser
+      ? process.env.NEXT_PUBLIC_API_ROOT
+      : process.env.NEXT_PUBLIC_API_ROOT_LOCAL
+    await fetch(baseUrl + url, {
+      method: 'POST',
+      cache: 'no-store',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        roomId,
+      }),
+    })
+    setPositionSelectModalOpen(true)
+    // console.log('test')
+    // const audio = new Audio('/audio/gameReady.mp3')
+    // await audio.play().then(() => {
+    //   console.log('jkkll')
+    // })
   }
   if (!pusherI) return <div />
   return (
@@ -127,30 +174,43 @@ export default function Room(props: { userId: string; roomId: string }) {
               </div>
             ))}
           </div>
+          {phase === 0 && (
+            <Paper className="w-96 my-3 mx-auto p-2 rounded-none flex justify-between">
+              {roomMasterId === userId ? (
+                <Button
+                  variant="outlined"
+                  className="rounded-none"
+                  onClick={dissolution}>
+                  部屋を解散する
+                </Button>
+              ) : (
+                <Button
+                  variant="outlined"
+                  className="rounded-none"
+                  onClick={() => leaving()}>
+                  退室する
+                </Button>
+              )}
+              <Button
+                variant="contained"
+                className="rounded-none"
+                onClick={gameStart}>
+                ゲーム開始
+              </Button>
+            </Paper>
+          )}
           <Paper className="w-96 my-3 mx-auto p-2 rounded-none flex justify-between">
-            {roomMasterId === userId ? (
+            {roomMasterId === userId && (
               <Button
                 variant="outlined"
                 className="rounded-none"
                 onClick={dissolution}>
                 部屋を解散する
               </Button>
-            ) : (
-              <Button
-                variant="outlined"
-                className="rounded-none"
-                onClick={() => leaving()}>
-                退室する
-              </Button>
             )}
-            <Button variant="contained" className="rounded-none">
-              ゲーム開始
-            </Button>
-          </Paper>
-          <Paper className="w-96 my-3 mx-auto p-2 rounded-none flex justify-between">
-            <Audio
+            <AudioI
               voiceOnUser={voiceOnUser}
-              setVoiceOnUser={setVoiceOnUser}
+              // setVoiceOnUser={setVoiceOnUser}
               userId={userId}
               roomId={roomId}
             />
@@ -166,6 +226,14 @@ export default function Room(props: { userId: string; roomId: string }) {
         userId={userId}
         roomId={roomId}
       />
+      {phase === 1 && (
+        <PositionSelectModal
+          positionSelectModalOpen={positionSelectModalOpen}
+          setPositionSelectModalOpen={setPositionSelectModalOpen}
+          userId={userId}
+          roomId={roomId}
+        />
+      )}
     </div>
   )
 }

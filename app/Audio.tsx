@@ -5,13 +5,13 @@ import { useLongPress } from 'use-long-press'
 
 export default function Audio(props: {
   voiceOnUser: Array<string>
-  setVoiceOnUser: React.Dispatch<React.SetStateAction<Array<string>>>
+  // setVoiceOnUser: React.Dispatch<React.SetStateAction<Array<string>>>
   userId: string
   roomId: string
 }) {
-  const { voiceOnUser, setVoiceOnUser, userId, roomId } = props
-  const [isAudioMute, setIsAudioMute] = useState(false)
+  const { voiceOnUser, userId, roomId } = props
   const userVideo = useRef(null)
+  const [isAudioMute, setIsAudioMute] = useState(false)
   useEffect(() => {
     navigator.mediaDevices
       .getUserMedia({ video: false, audio: true })

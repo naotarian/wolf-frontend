@@ -1,5 +1,7 @@
-import { getAllCookies } from '@/functions/getAllCookies'
 import { redirect } from 'next/navigation'
+
+import { getAllCookies } from '@/functions/getAllCookies'
+
 export const auth = async () => {
   try {
     const cookie = getAllCookies()
@@ -25,6 +27,8 @@ export const auth = async () => {
 export const guest = async () => {
   const cookie = getAllCookies()
   const options: RequestInit = {
+    referrerPolicy: 'origin',
+    credentials: 'include',
     headers: {
       cookie,
       'Content-Type': 'application/json',
@@ -39,5 +43,6 @@ export const guest = async () => {
   const res = await fetch(baseUrl + url, options)
   if (res.status !== 401) redirect('/')
   const test = await res.json()
+  console.log(test)
   return test
 }

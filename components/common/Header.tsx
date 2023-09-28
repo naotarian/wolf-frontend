@@ -26,6 +26,7 @@ export default function Header() {
         : process.env.NEXT_PUBLIC_API_ROOT_LOCAL
       const res = await fetch(baseUrl + url, {
         credentials: 'include',
+        referrerPolicy: 'origin',
         headers: {
           'Content-Type': 'application/json',
           'X-Requested-With': 'XMLHttpRequest',

@@ -27,6 +27,7 @@ export default function Form() {
       method: 'POST',
       cache: 'no-store',
       credentials: 'include',
+      referrerPolicy: 'origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: data.get('email'),
