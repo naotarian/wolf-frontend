@@ -12,7 +12,7 @@ import AudioI from '@/app/Audio'
 import PlayerInformationModal from '@/app/room/[id]/PlayerInformationModal'
 import PositionSelectModal from '@/app/room/[id]/PositionSelectModal'
 import { leavingHook, dissolutionHook } from '@/functions/room/roomAction'
-
+import Game from '@/app/room/[id]/Game'
 export default function Room(props: { userId: string; roomId: string }) {
   const router = useRouter()
   const { userId, roomId } = props
@@ -87,6 +87,15 @@ export default function Room(props: { userId: string; roomId: string }) {
           setPositionSelectModalOpen(data.phase === 1)
         },
       )
+      channel.bind(
+        `room-confirmed-${roomId}-event`,
+        (data: { roomId: string; confirmed: boolean }) => {
+          if (data.confirmed) {
+            setPhase(2)
+            setPositionSelectModalOpen(false)
+          }
+        },
+      )
       const url = '/room/participation'
       const baseUrl = process.browser
         ? process.env.NEXT_PUBLIC_API_ROOT
@@ -102,6 +111,7 @@ export default function Room(props: { userId: string; roomId: string }) {
         }),
       })
       const room = await res.json()
+      // setP
       setRoomMasterId(room.master_user_id)
     })()
   }, [pusherI])
@@ -176,12 +186,14 @@ export default function Room(props: { userId: string; roomId: string }) {
           {phase === 0 && (
             <Paper className="w-96 my-3 mx-auto p-2 rounded-none flex justify-between">
               {roomMasterId === userId ? (
-                <Button
-                  variant="outlined"
-                  className="rounded-none"
-                  onClick={dissolution}>
-                  部屋を解散する
-                </Button>
+                <div className="flex gap-4 justify-between">
+                  <Button
+                    variant="outlined"
+                    className="rounded-none"
+                    onClick={dissolution}>
+                    部屋を解散する
+                  </Button>
+                </div>
               ) : (
                 <Button
                   variant="outlined"
@@ -190,30 +202,34 @@ export default function Room(props: { userId: string; roomId: string }) {
                   退室する
                 </Button>
               )}
-              <Button
-                variant="contained"
-                className="rounded-none"
-                onClick={gameStart}>
-                ゲーム開始
-              </Button>
+              {roomMasterId === userId && (
+                <Button
+                  variant="contained"
+                  className="rounded-none"
+                  onClick={gameStart}>
+                  ゲーム開始
+                </Button>
+              )}
             </Paper>
           )}
-          <Paper className="w-96 my-3 mx-auto p-2 rounded-none flex justify-between">
-            {roomMasterId === userId && (
-              <Button
-                variant="outlined"
-                className="rounded-none"
-                onClick={dissolution}>
-                部屋を解散する
-              </Button>
-            )}
-            <AudioI
-              voiceOnUser={voiceOnUser}
-              // setVoiceOnUser={setVoiceOnUser}
-              userId={userId}
-              roomId={roomId}
-            />
-          </Paper>
+          {phase === 0 && (
+            <Paper className="w-96 my-3 mx-auto p-2 rounded-none flex justify-between">
+              {roomMasterId === userId && (
+                <Button
+                  variant="outlined"
+                  className="rounded-none"
+                  onClick={dissolution}>
+                  部屋を解散する
+                </Button>
+              )}
+              <AudioI
+                voiceOnUser={voiceOnUser}
+                // setVoiceOnUser={setVoiceOnUser}
+                userId={userId}
+                roomId={roomId}
+              />
+            </Paper>
+          )}
         </div>
       )}
       <PlayerInformationModal
@@ -233,6 +249,7 @@ export default function Room(props: { userId: string; roomId: string }) {
           roomId={roomId}
         />
       )}
+      {phase === 2 && <Game />}
     </div>
   )
 }
