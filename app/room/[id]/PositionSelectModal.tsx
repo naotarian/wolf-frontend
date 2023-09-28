@@ -37,6 +37,8 @@ export default function PositionSelectModal(props: {
   } = props
   const handleClose = () => setPositionSelectModalOpen(false)
   const [secs, setSeconds] = useState(30)
+  const [decisionPosition, setDecisionPosition] = useState<number>(0)
+  const [buyMessage, setBuyMessage] = useState<string>('')
   useEffect(() => {
     const sampleInterval = setInterval(() => {
       // if (secs === 0) handleClose()
@@ -52,6 +54,35 @@ export default function PositionSelectModal(props: {
     const audio = new Audio('/audio/gameReady.mp3')
     audio.play()
   }, [])
+  // 役職が選択されたとき
+  const selectPosition = async (positionId: number) => {
+    if (decisionPosition !== 0) return
+    const url = '/room/select_position'
+    const baseUrl = process.browser
+      ? process.env.NEXT_PUBLIC_API_ROOT
+      : process.env.NEXT_PUBLIC_API_ROOT_LOCAL
+    const res = await fetch(baseUrl + url, {
+      method: 'POST',
+      cache: 'no-store',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        roomId,
+        positionId,
+      }),
+    })
+    const result = await res.json()
+    if (result.couldBuy) {
+      setDecisionPosition(positionId)
+    }
+    if (!result.couldBuy) {
+      setBuyMessage('購入できませんでした。')
+    }
+    window.setTimeout(() => {
+      setBuyMessage('')
+    }, 2000)
+  }
   // const forceLeaving = async (leavingUserId: string) => {
   //   const url = '/room/leaving'
   //   const baseUrl = process.browser
@@ -80,20 +111,36 @@ export default function PositionSelectModal(props: {
         <Box sx={style}>
           <div>{secs && <span>{secs}</span>}</div>{' '}
           <Typography variant="h2">役職を先取り</Typography>
+          {buyMessage && (
+            <Typography variant="body1" className="text-[#a1080f] font-bold">
+              {buyMessage}
+            </Typography>
+          )}
           <div className="flex gap-4">
             {position.map((data, index) => (
               <div>
-                <Typography variant="body1">{data.name}</Typography>
-                <Button>
+                <Typography variant="body1">
+                  {data.name} x{data.number}
+                </Typography>
+                <Button onClick={() => selectPosition(data.id)} className="p-0">
                   <Image
                     src={`/images/position/${data.id}.png`}
                     alt="Picture of the author"
                     width={100}
                     height={100}
                     priority={false}
-                    className="border-2 mx-auto"
+                    className={`border-2 mx-auto ${
+                      decisionPosition === data.id ? 'border-[#a1080f]' : ''
+                    }`}
                   />
                 </Button>
+                {decisionPosition === data.id && (
+                  <Typography
+                    variant="body1"
+                    className="text-[#a1080f] font-bold">
+                    購入済み
+                  </Typography>
+                )}
               </div>
             ))}
           </div>

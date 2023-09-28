@@ -83,7 +83,6 @@ export default function Room(props: { userId: string; roomId: string }) {
       channel.bind(
         `room-phase-${roomId}-event`,
         (data: { roomId: string; phase: number }) => {
-          console.log(data)
           setPhase(data.phase)
           setPositionSelectModalOpen(data.phase === 1)
         },
