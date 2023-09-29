@@ -15,10 +15,13 @@ export default function Game(props: {
   console.log(userId)
   console.log(users)
   const positionId = users.find(e => e.id === userId)
-  console.log(positionId)
+  const aliveUser = users.filter(user => user.is_alive !== false)
+  console.log(aliveUser)
   return (
     <div>
-      {situation && positionId && <Night positionId={positionId.position} />}
+      {situation && positionId && (
+        <Night positionId={positionId.position} aliveUser={aliveUser} />
+      )}
       {!situation && <p>朝</p>}
     </div>
   )

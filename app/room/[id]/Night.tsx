@@ -2,27 +2,37 @@
 
 import { useState, useEffect } from 'react'
 
-import { useCountDownInterval } from '@/hooks/useCountDownInterval'
+import ActionModal from '@/app/room/[id]/ActionModal'
+export default function Night(props: {
+  positionId: number
+  aliveUser: Array<{
+    name: string
+    id: string
+    character_id: number
+    is_alive: boolean
+    position: number
+  }>
+}) {
+  const { positionId, aliveUser } = props
 
-export default function Night(props: { positionId: number }) {
-  const { positionId } = props
-  const [countTime, setCountTime] = useState<number>(60)
-  const [status, setStatus] = useState(true)
-  useCountDownInterval(countTime, setCountTime)
+  const [status, setStatus] = useState(false)
+  const [actionModalOpen, setActionModalOpen] = useState<boolean>(false)
+
   useEffect(() => {
-    if (!status) return
+    if (status) return
     const audio = new Audio(`/audio/night/${positionId}.mp3`)
     audio.play()
-    setStatus(false)
+    setStatus(true)
+    setActionModalOpen(true)
   }, [status])
-  // useEffect(() => {
-  //   if (status) return
-  //   const audio = new Audio(`/audio/night/2.mp3`)
-  //   audio.play()
-  // }, [status])
   return (
     <div>
-      <p>ゲーム残り時間: {countTime}</p>
+      <ActionModal
+        actionModalOpen={actionModalOpen}
+        setActionModalOpen={setActionModalOpen}
+        positionId={positionId}
+        aliveUser={aliveUser}
+      />
     </div>
   )
 }
