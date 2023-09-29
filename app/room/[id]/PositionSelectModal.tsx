@@ -43,8 +43,6 @@ export default function PositionSelectModal(props: {
   const [castId, setCastId] = useState<number>(0)
   useEffect(() => {
     const sampleInterval = setInterval(() => {
-      if (secs === 0) {
-      }
       if (secs > 0) {
         setSeconds(secs - 1)
       }
@@ -63,7 +61,7 @@ export default function PositionSelectModal(props: {
       audio.play()
     }
   }, [status])
-  //0秒になった時
+  // 0秒になった時
   useEffect(() => {
     ;(async () => {
       if (secs !== 0) return
@@ -222,7 +220,7 @@ export default function PositionSelectModal(props: {
                 width={100}
                 height={100}
                 priority={false}
-                className={`border-2 mx-auto`}
+                className="border-2 mx-auto"
               />
               <Button
                 className="rounded-none float-right"

@@ -9,10 +9,11 @@ import { Button, Paper, Typography } from '@mui/material'
 import Pusher from 'pusher-js'
 
 import AudioI from '@/app/Audio'
+import Game from '@/app/room/[id]/Game'
 import PlayerInformationModal from '@/app/room/[id]/PlayerInformationModal'
 import PositionSelectModal from '@/app/room/[id]/PositionSelectModal'
 import { leavingHook, dissolutionHook } from '@/functions/room/roomAction'
-import Game from '@/app/room/[id]/Game'
+
 export default function Room(props: { userId: string; roomId: string }) {
   const router = useRouter()
   const { userId, roomId } = props
@@ -26,13 +27,19 @@ export default function Room(props: { userId: string; roomId: string }) {
     character_id: number
   }>({ name: '', id: '', character_id: 0 })
   const [users, setUsers] = useState<
-    Array<{ name: string; id: string; character_id: number }>
+    Array<{
+      name: string
+      id: string
+      character_id: number
+      is_alive: boolean
+      position: number
+    }>
   >([])
   const [pusherI, setPusherI] = useState<Pusher>()
   const [roomMasterId, setRoomMasterId] = useState<string>('')
   const [voiceOnUser, setVoiceOnUser] = useState<Array<string>>([])
   const [phase, setPhase] = useState<number>(0)
-
+  const [situation, setSituation] = useState<boolean>(true)
   useEffect(() => {
     console.log('ousher')
     setPusherI(
@@ -46,17 +53,6 @@ export default function Room(props: { userId: string; roomId: string }) {
       pusherI.unsubscribe(`room${roomId}-channel`)
     }
   }, [])
-  // useEffect(() => {
-  //   if (phase !== 1) return
-  //   const sampleInterval = setInterval(() => {
-  //     if (secs > 0) {
-  //       setSeconds(secs - 1)
-  //     }
-  //   }, 1000)
-  //   return () => {
-  //     clearInterval(sampleInterval)
-  //   }
-  // }, [phase])
   useEffect(() => {
     ;(async () => {
       if (!pusherI) return
@@ -64,7 +60,13 @@ export default function Room(props: { userId: string; roomId: string }) {
       channel.bind(
         `room${roomId}-event`,
         (data: {
-          users: Array<{ id: string; name: string; character_id: number }>
+          users: Array<{
+            id: string
+            name: string
+            character_id: number
+            is_alive: boolean
+            position: number
+          }>
         }) => {
           const exist = data.users.find(e => e.id === userId)
           if (!exist) {
@@ -94,6 +96,12 @@ export default function Room(props: { userId: string; roomId: string }) {
             setPhase(2)
             setPositionSelectModalOpen(false)
           }
+        },
+      )
+      channel.bind(
+        `room-situation-${roomId}-event`,
+        (data: { roomId: string; situation: boolean }) => {
+          setSituation(data.situation)
         },
       )
       const url = '/room/participation'
@@ -141,11 +149,6 @@ export default function Room(props: { userId: string; roomId: string }) {
       }),
     })
     setPositionSelectModalOpen(true)
-    // console.log('test')
-    // const audio = new Audio('/audio/gameReady.mp3')
-    // await audio.play().then(() => {
-    //   console.log('jkkll')
-    // })
   }
   if (!pusherI) return <div />
   return (
@@ -154,35 +157,73 @@ export default function Room(props: { userId: string; roomId: string }) {
         <div>
           <div className="grid grid-cols-4 gap-4 min-h-[50%]">
             {users.map((data, index) => (
-              <div className="text-center" key={data.name}>
-                <Typography
-                  variant="body1"
-                  className={`${
-                    voiceOnUser.includes(data.id)
-                      ? 'text-[#a1080f]'
-                      : 'text-white'
-                  }`}>
-                  {index + 1}.{data.name}
-                </Typography>
-                <Button
-                  onClick={() => {
-                    setSelectedPlayer(data)
-                    setPlayerInformationModalOpen(true)
-                  }}>
-                  <Image
-                    src={`/images/characters/No${data.character_id}.jpg`}
-                    alt="Picture of the author"
-                    width={100}
-                    height={100}
-                    priority={false}
-                    className={`border-2 mx-auto ${
-                      voiceOnUser.includes(data.id) ? 'border-[#a1080f]' : ''
-                    }`}
-                  />
-                </Button>
+              <div>
+                {data.is_alive ? (
+                  <div className="text-center" key={data.name}>
+                    <Typography
+                      variant="body1"
+                      className={`${
+                        voiceOnUser.includes(data.id)
+                          ? 'text-[#a1080f]'
+                          : 'text-white'
+                      }`}>
+                      {index + 1}.{data.name}
+                    </Typography>
+                    <Button
+                      onClick={() => {
+                        setSelectedPlayer(data)
+                        setPlayerInformationModalOpen(true)
+                      }}>
+                      <Image
+                        src={`/images/characters/No${data.character_id}.jpg`}
+                        alt="Picture of the author"
+                        width={100}
+                        height={100}
+                        priority={false}
+                        className={`border-2 mx-auto ${
+                          voiceOnUser.includes(data.id)
+                            ? 'border-[#a1080f]'
+                            : ''
+                        }`}
+                      />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center" key={data.name}>
+                    <Typography
+                      variant="body1"
+                      className={`${
+                        voiceOnUser.includes(data.id)
+                          ? 'text-[#a1080f]'
+                          : 'text-white'
+                      }`}>
+                      {index + 1}.{data.name}(死亡)
+                    </Typography>
+                    <Button
+                      onClick={() => {
+                        setSelectedPlayer(data)
+                        setPlayerInformationModalOpen(true)
+                      }}>
+                      <Image
+                        src={`/images/characters/No${data.character_id}.jpg`}
+                        alt="Picture of the author"
+                        width={100}
+                        height={100}
+                        priority={false}
+                        className="border-2 mx-auto opacity-25"
+                      />
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
+          <Button
+            variant="outlined"
+            className="rounded-none"
+            onClick={dissolution}>
+            部屋を解散する
+          </Button>
           {phase === 0 && (
             <Paper className="w-96 my-3 mx-auto p-2 rounded-none flex justify-between">
               {roomMasterId === userId ? (
@@ -212,6 +253,7 @@ export default function Room(props: { userId: string; roomId: string }) {
               )}
             </Paper>
           )}
+
           {phase === 0 && (
             <Paper className="w-96 my-3 mx-auto p-2 rounded-none flex justify-between">
               {roomMasterId === userId && (
@@ -249,7 +291,9 @@ export default function Room(props: { userId: string; roomId: string }) {
           roomId={roomId}
         />
       )}
-      {phase === 2 && <Game />}
+      {phase === 2 && (
+        <Game situation={situation} users={users} userId={userId} />
+      )}
     </div>
   )
 }
