@@ -119,7 +119,7 @@ export default function PositionSelectModal(props: {
     const baseUrl = process.browser
       ? process.env.NEXT_PUBLIC_API_ROOT
       : process.env.NEXT_PUBLIC_API_ROOT_LOCAL
-    const res = await fetch(baseUrl + url, {
+    await fetch(baseUrl + url, {
       method: 'POST',
       cache: 'no-store',
       credentials: 'include',
@@ -131,24 +131,6 @@ export default function PositionSelectModal(props: {
       }),
     })
   }
-  // const forceLeaving = async (leavingUserId: string) => {
-  //   const url = '/room/leaving'
-  //   const baseUrl = process.browser
-  //     ? process.env.NEXT_PUBLIC_API_ROOT
-  //     : process.env.NEXT_PUBLIC_API_ROOT_LOCAL
-  //   await fetch(baseUrl + url, {
-  //     method: 'POST',
-  //     cache: 'no-store',
-  //     credentials: 'include',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: JSON.stringify({
-  //       userId: leavingUserId,
-  //       roomId,
-  //     }),
-  //   })
-  //   setSelectedPlayer({ name: '', id: '', character_id: 0 })
-  //   setPositionSelectModalOpen(false)
-  // }
   return (
     <div>
       <Modal

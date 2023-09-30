@@ -1,3 +1,5 @@
+import type Pusher from 'pusher-js'
+
 import Night from '@/app/room/[id]/Night'
 
 export default function Game(props: {
@@ -10,17 +12,21 @@ export default function Game(props: {
     is_alive: boolean
     position: number
   }>
+  channelI: Pusher
+  roomId: string
 }) {
-  const { situation, userId, users } = props
-  console.log(userId)
-  console.log(users)
+  const { situation, userId, users, channelI, roomId } = props
   const positionId = users.find(e => e.id === userId)
   const aliveUser = users.filter(user => user.is_alive !== false)
-  console.log(aliveUser)
   return (
     <div>
       {situation && positionId && (
-        <Night positionId={positionId.position} aliveUser={aliveUser} />
+        <Night
+          positionId={positionId.position}
+          aliveUser={aliveUser}
+          channelI={channelI}
+          roomId={roomId}
+        />
       )}
       {!situation && <p>朝</p>}
     </div>

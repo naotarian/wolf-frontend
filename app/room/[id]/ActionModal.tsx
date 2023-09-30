@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react'
 
 import { Button } from '@mui/material'
-import { useCountDownInterval } from '@/hooks/useCountDownInterval'
-import Avatar from '@mui/material/Avatar'
+
 import Box from '@mui/material/Box'
 import Modal from '@mui/material/Modal'
-import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
+
+import type Pusher from 'pusher-js'
+
+import { useCountDownInterval } from '@/hooks/useCountDownInterval'
 
 const style = {
   position: 'absolute' as const,
@@ -33,12 +35,19 @@ export default function ActionModal(props: {
     is_alive: boolean
     position: number
   }>
+  channelI: Pusher
+  count: number
 }) {
-  const { actionModalOpen, setActionModalOpen, positionId, aliveUser } = props
+  const {
+    actionModalOpen,
+    setActionModalOpen,
+    positionId,
+    aliveUser,
+    channelI,
+    count,
+  } = props
   const [countTime, setCountTime] = useState<number>(30)
   useCountDownInterval(countTime, setCountTime)
-  console.log(aliveUser)
-  console.log(positionId)
   const handleClose = () => setActionModalOpen(false)
   const modalContents = (positionId: number) => {
     if (positionId === 1) {
@@ -75,7 +84,7 @@ export default function ActionModal(props: {
   useEffect(() => {
     ;(async () => {
       if (countTime !== 0) return
-      console.log(countTime)
+      // console.log(countTime)
     })()
   }, [countTime])
   return (
@@ -86,7 +95,7 @@ export default function ActionModal(props: {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description">
         <Box sx={style}>
-          <Typography>{countTime}</Typography>
+          <Typography>{count}</Typography>
           {modalContents(positionId)}
         </Box>
       </Modal>

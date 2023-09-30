@@ -36,17 +36,21 @@ export default function Room(props: { userId: string; roomId: string }) {
     }>
   >([])
   const [pusherI, setPusherI] = useState<Pusher>()
+  const [channelI, setChannelI] = useState<Pusher>()
   const [roomMasterId, setRoomMasterId] = useState<string>('')
   const [voiceOnUser, setVoiceOnUser] = useState<Array<string>>([])
   const [phase, setPhase] = useState<number>(0)
   const [situation, setSituation] = useState<boolean>(true)
   useEffect(() => {
     console.log('ousher')
-    setPusherI(
-      new Pusher(String(process.env.NEXT_PUBLIC_PUSHER_KEY), {
+    const pusherConnect = new Pusher(
+      String(process.env.NEXT_PUBLIC_PUSHER_KEY),
+      {
         cluster: String(process.env.NEXT_PUBLIC_PUSHER_CLUSTER),
-      }),
+      },
     )
+    setPusherI(pusherConnect)
+    setChannelI(pusherConnect.subscribe(`room${roomId}-channel`))
     return () => {
       // アンマウント時にチャンネル購読を辞める
       if (!pusherI) return
@@ -55,9 +59,9 @@ export default function Room(props: { userId: string; roomId: string }) {
   }, [])
   useEffect(() => {
     ;(async () => {
-      if (!pusherI) return
-      const channel = pusherI.subscribe(`room${roomId}-channel`)
-      channel.bind(
+      if (!pusherI || !channelI) return
+      // const channel = pusherI.subscribe(`room${roomId}-channel`)
+      channelI.bind(
         `room${roomId}-event`,
         (data: {
           users: Array<{
@@ -76,20 +80,20 @@ export default function Room(props: { userId: string; roomId: string }) {
           setUsers(data.users)
         },
       )
-      channel.bind(
+      channelI.bind(
         `room-voice-${roomId}-event`,
         (data: { voice_user_id: Array<string> }) => {
           setVoiceOnUser(data.voice_user_id)
         },
       )
-      channel.bind(
+      channelI.bind(
         `room-phase-${roomId}-event`,
         (data: { roomId: string; phase: number }) => {
           setPhase(data.phase)
           setPositionSelectModalOpen(data.phase === 1)
         },
       )
-      channel.bind(
+      channelI.bind(
         `room-confirmed-${roomId}-event`,
         (data: { roomId: string; confirmed: boolean }) => {
           if (data.confirmed) {
@@ -98,7 +102,7 @@ export default function Room(props: { userId: string; roomId: string }) {
           }
         },
       )
-      channel.bind(
+      channelI.bind(
         `room-situation-${roomId}-event`,
         (data: { roomId: string; situation: boolean }) => {
           setSituation(data.situation)
@@ -150,7 +154,7 @@ export default function Room(props: { userId: string; roomId: string }) {
     })
     setPositionSelectModalOpen(true)
   }
-  if (!pusherI) return <div />
+  if (!pusherI || !channelI) return <div />
   return (
     <div className="h-screen">
       {roomMasterId && (
@@ -292,7 +296,13 @@ export default function Room(props: { userId: string; roomId: string }) {
         />
       )}
       {phase === 2 && (
-        <Game situation={situation} users={users} userId={userId} />
+        <Game
+          situation={situation}
+          users={users}
+          userId={userId}
+          channelI={channelI}
+          roomId={roomId}
+        />
       )}
     </div>
   )
