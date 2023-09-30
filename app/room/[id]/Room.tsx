@@ -293,6 +293,7 @@ export default function Room(props: { userId: string; roomId: string }) {
           setPositionSelectModalOpen={setPositionSelectModalOpen}
           userId={userId}
           roomId={roomId}
+          channelI={channelI}
         />
       )}
       {phase === 2 && (
