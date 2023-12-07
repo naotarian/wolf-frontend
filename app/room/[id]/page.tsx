@@ -21,7 +21,7 @@ export default async function Home({ params }: { params: { id: string } }) {
   // })
   // if (res.status === 404) redirect('/')
   return (
-    <main className="min-h-screen flex-col items-center justify-between p-24">
+    <main className="min-h-screen flex-col items-center justify-between p-24 h-[100vh] bg-[url('/images/room/room.jpg')] bg-cover">
       <Room userId={user.id} roomId={roomId} />
     </main>
   )

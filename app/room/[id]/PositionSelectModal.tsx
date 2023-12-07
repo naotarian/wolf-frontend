@@ -146,6 +146,7 @@ export default function PositionSelectModal(props: {
   return (
     <div>
       <Modal
+        onClose={handleClose}
         open={positionSelectModalOpen}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description">
@@ -166,7 +167,7 @@ export default function PositionSelectModal(props: {
                 </Typography>
               )}
               <div className="flex gap-4">
-                {position.map((data, index) => (
+                {position.map((data, _) => (
                   <div>
                     <Typography variant="body1">
                       {data.name} x{data.number}

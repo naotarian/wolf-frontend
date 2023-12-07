@@ -2,17 +2,15 @@
 
 import React, { useState, useEffect } from 'react'
 
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
-import { Button, Paper, Typography } from '@mui/material'
 import Pusher from 'pusher-js'
 
-import AudioI from '@/app/Audio'
 import Game from '@/app/room/[id]/Game'
 import PlayerInformationModal from '@/app/room/[id]/PlayerInformationModal'
 import PositionSelectModal from '@/app/room/[id]/PositionSelectModal'
-import { leavingHook, dissolutionHook } from '@/functions/room/roomAction'
+import RoomOperation from '@/app/room/[id]/RoomOperation'
+import UserList from '@/app/room/[id]/UserList'
 
 export default function Room(props: { userId: string; roomId: string }) {
   const router = useRouter()
@@ -42,7 +40,6 @@ export default function Room(props: { userId: string; roomId: string }) {
   const [phase, setPhase] = useState<number>(0)
   const [situation, setSituation] = useState<boolean>(true)
   useEffect(() => {
-    console.log('ousher')
     const pusherConnect = new Pusher(
       String(process.env.NEXT_PUBLIC_PUSHER_KEY),
       {
@@ -127,156 +124,147 @@ export default function Room(props: { userId: string; roomId: string }) {
       setRoomMasterId(room.master_user_id)
     })()
   }, [pusherI])
-  // 退室処理
-  const leaving = async () => {
-    await leavingHook(userId, roomId)
-    router.push('/')
-  }
-  // 部屋を解散
-  const dissolution = async () => {
-    await dissolutionHook(userId, roomId)
-    router.push('/')
-  }
-  const gameStart = async () => {
-    const url = '/room/pre_start'
-    const baseUrl = process.browser
-      ? process.env.NEXT_PUBLIC_API_ROOT
-      : process.env.NEXT_PUBLIC_API_ROOT_LOCAL
-    await fetch(baseUrl + url, {
-      method: 'POST',
-      cache: 'no-store',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId,
-        roomId,
-      }),
-    })
-    setPositionSelectModalOpen(true)
-  }
+
   if (!pusherI || !channelI) return <div />
   return (
     <div className="h-screen">
       {roomMasterId && (
-        <div>
-          <div className="grid grid-cols-4 gap-4 min-h-[50%]">
-            {users.map((data, index) => (
-              <div>
-                {data.is_alive ? (
-                  <div className="text-center" key={data.name}>
-                    <Typography
-                      variant="body1"
-                      className={`${
-                        voiceOnUser.includes(data.id)
-                          ? 'text-[#a1080f]'
-                          : 'text-white'
-                      }`}>
-                      {index + 1}.{data.name}
-                    </Typography>
-                    <Button
-                      onClick={() => {
-                        setSelectedPlayer(data)
-                        setPlayerInformationModalOpen(true)
-                      }}>
-                      <Image
-                        src={`/images/characters/No${data.character_id}.jpg`}
-                        alt="Picture of the author"
-                        width={100}
-                        height={100}
-                        priority={false}
-                        className={`border-2 mx-auto ${
-                          voiceOnUser.includes(data.id)
-                            ? 'border-[#a1080f]'
-                            : ''
-                        }`}
-                      />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="text-center" key={data.name}>
-                    <Typography
-                      variant="body1"
-                      className={`${
-                        voiceOnUser.includes(data.id)
-                          ? 'text-[#a1080f]'
-                          : 'text-white'
-                      }`}>
-                      {index + 1}.{data.name}(死亡)
-                    </Typography>
-                    <Button
-                      onClick={() => {
-                        setSelectedPlayer(data)
-                        setPlayerInformationModalOpen(true)
-                      }}>
-                      <Image
-                        src={`/images/characters/No${data.character_id}.jpg`}
-                        alt="Picture of the author"
-                        width={100}
-                        height={100}
-                        priority={false}
-                        className="border-2 mx-auto opacity-25"
-                      />
-                    </Button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          <Button
-            variant="outlined"
-            className="rounded-none"
-            onClick={dissolution}>
-            部屋を解散する
-          </Button>
+        <>
+          <UserList
+            users={users}
+            voiceOnUser={voiceOnUser}
+            setSelectedPlayer={setSelectedPlayer}
+            setPlayerInformationModalOpen={setPlayerInformationModalOpen}
+          />
           {phase === 0 && (
-            <Paper className="w-96 my-3 mx-auto p-2 rounded-none flex justify-between">
-              {roomMasterId === userId ? (
-                <div className="flex gap-4 justify-between">
-                  <Button
-                    variant="outlined"
-                    className="rounded-none"
-                    onClick={dissolution}>
-                    部屋を解散する
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  variant="outlined"
-                  className="rounded-none"
-                  onClick={() => leaving()}>
-                  退室する
-                </Button>
-              )}
-              {roomMasterId === userId && (
-                <Button
-                  variant="contained"
-                  className="rounded-none"
-                  onClick={gameStart}>
-                  ゲーム開始
-                </Button>
-              )}
-            </Paper>
+            <RoomOperation
+              userId={userId}
+              roomId={roomId}
+              setPositionSelectModalOpen={setPositionSelectModalOpen}
+              phase={phase}
+              roomMasterId={roomMasterId}
+            />
           )}
+        </>
+        // <div>
+        //   <div className="grid grid-cols-4 gap-4 min-h-[50%]">
+        //     {users.map((data, index) => (
+        //       <div>
+        //         {data.is_alive ? (
+        //           <div className="text-center" key={data.name}>
+        //             <Typography
+        //               variant="body1"
+        //               className={`${
+        //                 voiceOnUser.includes(data.id)
+        //                   ? 'text-[#a1080f]'
+        //                   : 'text-white'
+        //               }`}>
+        //               {index + 1}.{data.name}
+        //             </Typography>
+        //             <Button
+        //               onClick={() => {
+        //                 setSelectedPlayer(data)
+        //                 setPlayerInformationModalOpen(true)
+        //               }}>
+        //               <Image
+        //                 src={`/images/characters/No${data.character_id}.jpg`}
+        //                 alt="Picture of the author"
+        //                 width={100}
+        //                 height={100}
+        //                 priority={false}
+        //                 className={`border-2 mx-auto ${
+        //                   voiceOnUser.includes(data.id)
+        //                     ? 'border-[#a1080f]'
+        //                     : ''
+        //                 }`}
+        //               />
+        //             </Button>
+        //           </div>
+        //         ) : (
+        //           <div className="text-center" key={data.name}>
+        //             <Typography
+        //               variant="body1"
+        //               className={`${
+        //                 voiceOnUser.includes(data.id)
+        //                   ? 'text-[#a1080f]'
+        //                   : 'text-white'
+        //               }`}>
+        //               {index + 1}.{data.name}(死亡)
+        //             </Typography>
+        //             <Button
+        //               onClick={() => {
+        //                 setSelectedPlayer(data)
+        //                 setPlayerInformationModalOpen(true)
+        //               }}>
+        //               <Image
+        //                 src={`/images/characters/No${data.character_id}.jpg`}
+        //                 alt="Picture of the author"
+        //                 width={100}
+        //                 height={100}
+        //                 priority={false}
+        //                 className="border-2 mx-auto opacity-25"
+        //               />
+        //             </Button>
+        //           </div>
+        //         )}
+        //       </div>
+        //     ))}
+        //   </div>
+        //   <Button
+        //     variant="outlined"
+        //     className="rounded-none"
+        //     onClick={dissolution}>
+        //     部屋を解散する
+        //   </Button>
+        //   {phase === 0 && (
+        //     <Paper className="w-96 my-3 mx-auto p-2 rounded-none flex justify-between">
+        //       {roomMasterId === userId ? (
+        //         <div className="flex gap-4 justify-between">
+        //           <Button
+        //             variant="outlined"
+        //             className="rounded-none"
+        //             onClick={dissolution}>
+        //             部屋を解散する
+        //           </Button>
+        //         </div>
+        //       ) : (
+        //         <Button
+        //           variant="outlined"
+        //           className="rounded-none"
+        //           onClick={() => leaving()}>
+        //           退室する
+        //         </Button>
+        //       )}
+        //       {roomMasterId === userId && (
+        //         <Button
+        //           variant="contained"
+        //           className="rounded-none"
+        //           onClick={gameStart}>
+        //           ゲーム開始
+        //         </Button>
+        //       )}
+        //     </Paper>
+        //   )}
 
-          {phase === 0 && (
-            <Paper className="w-96 my-3 mx-auto p-2 rounded-none flex justify-between">
-              {roomMasterId === userId && (
-                <Button
-                  variant="outlined"
-                  className="rounded-none"
-                  onClick={dissolution}>
-                  部屋を解散する
-                </Button>
-              )}
-              <AudioI
-                voiceOnUser={voiceOnUser}
-                // setVoiceOnUser={setVoiceOnUser}
-                userId={userId}
-                roomId={roomId}
-              />
-            </Paper>
-          )}
-        </div>
+        //   {phase === 0 && (
+        //     <Paper className="w-96 my-3 mx-auto p-2 rounded-none flex justify-between">
+        //       {roomMasterId === userId && (
+        //         <Button
+        //           variant="outlined"
+        //           className="rounded-none"
+        //           onClick={dissolution}>
+        //           部屋を解散する
+        //         </Button>
+        //       )}
+        //       <AudioI
+        //         voiceOnUser={voiceOnUser}
+        //         // setVoiceOnUser={setVoiceOnUser}
+        //         userId={userId}
+        //         roomId={roomId}
+        //       />
+        //     </Paper>
+        //   )}
+        // </div>
       )}
       <PlayerInformationModal
         playerInformationModalOpen={playerInformationModalOpen}
