@@ -9,8 +9,6 @@ import { Button, Typography } from '@mui/material'
 import Box from '@mui/material/Box'
 import Modal from '@mui/material/Modal'
 
-import type Pusher from 'pusher-js'
-
 import { position } from '@/const/position'
 
 const style = {
@@ -30,39 +28,35 @@ export default function PositionSelectModal(props: {
   setPositionSelectModalOpen: React.Dispatch<React.SetStateAction<boolean>>
   userId: string
   roomId: string
-  channelI: Pusher
+  remainingTime: number
+  setRemainingTime: React.Dispatch<React.SetStateAction<number>>
+  // channelI: Pusher
 }) {
   const {
     positionSelectModalOpen,
     setPositionSelectModalOpen,
     userId,
     roomId,
-    channelI,
+    remainingTime,
+    setRemainingTime,
+    // channelI,
   } = props
   const handleClose = () => setPositionSelectModalOpen(false)
-  const [count, setCount] = useState<number>(15)
+  // const [count, setCount] = useState<number>(remainingTime)
   const [decisionPosition, setDecisionPosition] = useState<number>(0)
   const [buyMessage, setBuyMessage] = useState<string>('')
   const [status, setStatus] = useState<number>(0)
   const [castId, setCastId] = useState<number>(0)
-  // useEffect(() => {
-  //   const sampleInterval = setInterval(() => {
-  //     if (secs > 0) {
-  //       setSeconds(secs - 1)
-  //     }
-  //   }, 1000)
-  //   return () => {
-  //     clearInterval(sampleInterval)
-  //   }
-  // })
   useEffect(() => {
-    channelI.bind(
-      `room-countdown-${roomId}-event`,
-      (data: { roomId: string; count: number }) => {
-        setCount(data.count)
-      },
-    )
-  }, [channelI])
+    const sampleInterval = setInterval(() => {
+      if (remainingTime > 0) {
+        setRemainingTime(remainingTime - 1)
+      }
+    }, 1000)
+    return () => {
+      clearInterval(sampleInterval)
+    }
+  })
   useEffect(() => {
     if (status === 0) {
       const audio = new Audio('/audio/gameReady.mp3')
@@ -76,7 +70,8 @@ export default function PositionSelectModal(props: {
   // 0秒になった時
   useEffect(() => {
     ;(async () => {
-      if (count !== 0) return
+      console.log(remainingTime)
+      if (remainingTime !== 0) return
       const url = '/room/ramdom_position'
       const baseUrl = process.browser
         ? process.env.NEXT_PUBLIC_API_ROOT
@@ -96,7 +91,7 @@ export default function PositionSelectModal(props: {
       setCastId(result.id)
       setStatus(1)
     })()
-  }, [count])
+  }, [remainingTime])
   // 役職が選択されたとき
   const selectPosition = async (positionId: number) => {
     if (decisionPosition !== 0) return
@@ -155,7 +150,7 @@ export default function PositionSelectModal(props: {
             <div>
               <div>
                 <Typography variant="h2" className="text-[#333]">
-                  {count}
+                  {remainingTime}
                 </Typography>
               </div>{' '}
               <Typography variant="h2">役職を先取り</Typography>

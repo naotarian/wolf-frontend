@@ -1,5 +1,3 @@
-import type Pusher from 'pusher-js'
-
 import Night from '@/app/room/[id]/Night'
 
 export default function Game(props: {
@@ -12,10 +10,20 @@ export default function Game(props: {
     is_alive: boolean
     position: number
   }>
-  channelI: Pusher
+  // channelI: Pusher
   roomId: string
+  remainingTime: number
+  setRemainingTime: React.Dispatch<React.SetStateAction<number>>
 }) {
-  const { situation, userId, users, channelI, roomId } = props
+  const {
+    situation,
+    userId,
+    users,
+    // channelI,
+    roomId,
+    remainingTime,
+    setRemainingTime,
+  } = props
   const positionId = users.find(e => e.id === userId)
   const aliveUser = users.filter(user => user.is_alive !== false)
   return (
@@ -24,8 +32,10 @@ export default function Game(props: {
         <Night
           positionId={positionId.position}
           aliveUser={aliveUser}
-          channelI={channelI}
+          // channelI={channelI}
           roomId={roomId}
+          remainingTime={remainingTime}
+          setRemainingTime={setRemainingTime}
         />
       )}
       {!situation && <p>朝</p>}

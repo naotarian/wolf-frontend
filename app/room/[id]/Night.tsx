@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react'
 
-import type Pusher from 'pusher-js'
-
 import ActionModal from '@/app/room/[id]/ActionModal'
 
 export default function Night(props: {
@@ -15,10 +13,19 @@ export default function Night(props: {
     is_alive: boolean
     position: number
   }>
-  channelI: Pusher
+  // channelI: Pusher
   roomId: string
+  remainingTime: number
+  setRemainingTime: React.Dispatch<React.SetStateAction<number>>
 }) {
-  const { positionId, aliveUser, channelI, roomId } = props
+  const {
+    positionId,
+    aliveUser,
+    // channelI,
+    roomId,
+    remainingTime,
+    setRemainingTime,
+  } = props
 
   const [status, setStatus] = useState(false)
   const [actionModalOpen, setActionModalOpen] = useState<boolean>(false)
@@ -31,13 +38,22 @@ export default function Night(props: {
     setActionModalOpen(true)
   }, [status])
   useEffect(() => {
-    channelI.bind(
-      `room-countdown-${roomId}-event`,
-      (data: { roomId: string; count: number }) => {
-        setCount(data.count)
-      },
-    )
-  }, [channelI])
+    const sampleInterval = setInterval(() => {
+      if (remainingTime > 0) {
+        setRemainingTime(remainingTime - 1)
+      }
+    }, 1000)
+    return () => {
+      clearInterval(sampleInterval)
+    }
+  })
+  // 0秒になった時
+  useEffect(() => {
+    ;(async () => {
+      if (remainingTime !== 0) return
+      console.log('0になったよ')
+    })()
+  }, [remainingTime])
   return (
     <div>
       <ActionModal
@@ -45,8 +61,9 @@ export default function Night(props: {
         setActionModalOpen={setActionModalOpen}
         positionId={positionId}
         aliveUser={aliveUser}
-        channelI={channelI}
+        // channelI={channelI}
         count={count}
+        remainingTime={remainingTime}
       />
     </div>
   )

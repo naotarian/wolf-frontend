@@ -9,16 +9,17 @@ export default async function Home({ params }: { params: { id: string } }) {
   // const baseUrl = process.browser
   //   ? process.env.NEXT_PUBLIC_API_ROOT
   //   : process.env.NEXT_PUBLIC_API_ROOT_LOCAL
-  // const res = await fetch(baseUrl + url, {
+  // const roomInformation = await fetch(baseUrl + url, {
   //   method: 'POST',
   //   cache: 'no-store',
   //   credentials: 'include',
   //   headers: { 'Content-Type': 'application/json' },
   //   body: JSON.stringify({
   //     user: user.id,
-  //     roomId: roomId,
+  //     roomId,
   //   }),
-  // })
+  // }).then(res => res.json())
+  // console.log(roomInformation)
   // if (res.status === 404) redirect('/')
   return (
     <main className="min-h-screen flex-col items-center justify-between p-24 h-[100vh] bg-[url('/images/room/room.jpg')] bg-cover">

@@ -1,14 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 import { Button } from '@mui/material'
 
 import Box from '@mui/material/Box'
 import Modal from '@mui/material/Modal'
 import Typography from '@mui/material/Typography'
-
-import type Pusher from 'pusher-js'
 
 import { useCountDownInterval } from '@/hooks/useCountDownInterval'
 
@@ -35,20 +33,31 @@ export default function ActionModal(props: {
     is_alive: boolean
     position: number
   }>
-  channelI: Pusher
+  // channelI: Pusher
   count: number
+  remainingTime: number
 }) {
   const {
     actionModalOpen,
     setActionModalOpen,
     positionId,
     aliveUser,
-    channelI,
+    // channelI,
     count,
+    remainingTime,
   } = props
   const [countTime, setCountTime] = useState<number>(30)
+  const [resultText, setResultText] = useState<string>('')
   useCountDownInterval(countTime, setCountTime)
   const handleClose = () => setActionModalOpen(false)
+  const telling = user => {
+    console.log(user)
+    let result = 'ではありませんでした。'
+    if (user.character_id === 2) {
+      result = 'です。'
+    }
+    setResultText(`占った対象は人狼${result}`)
+  }
   const modalContents = (positionId: number) => {
     if (positionId === 1) {
       return (
@@ -71,22 +80,27 @@ export default function ActionModal(props: {
           <div className="flex gap-4">
             {aliveUser.map((data, index) => (
               <div>
-                <Button variant="contained" className="rounded-none">
+                <Button
+                  variant="contained"
+                  className="rounded-none"
+                  onClick={() => telling(data)}>
                   {data.name}
                 </Button>
               </div>
             ))}
           </div>
+          {resultText && <Typography variant="body1">{resultText}</Typography>}
         </div>
       )
     }
   }
-  useEffect(() => {
-    ;(async () => {
-      if (countTime !== 0) return
-      // console.log(countTime)
-    })()
-  }, [countTime])
+
+  // useEffect(() => {
+  //   ;(async () => {
+  //     if (countTime !== 0) return
+  //     // console.log(countTime)
+  //   })()
+  // }, [countTime])
   return (
     <div>
       <Modal
@@ -95,7 +109,7 @@ export default function ActionModal(props: {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description">
         <Box sx={style}>
-          <Typography>{count}</Typography>
+          <Typography>{remainingTime}</Typography>
           {modalContents(positionId)}
         </Box>
       </Modal>

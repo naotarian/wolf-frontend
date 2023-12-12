@@ -4,13 +4,15 @@ import React, { useState, useEffect } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import Pusher from 'pusher-js'
+import PositionSelectModal from './PositionSelectModal'
+
+import type Pusher from 'pusher-js'
 
 import Game from '@/app/room/[id]/Game'
 import PlayerInformationModal from '@/app/room/[id]/PlayerInformationModal'
-import PositionSelectModal from '@/app/room/[id]/PositionSelectModal'
 import RoomOperation from '@/app/room/[id]/RoomOperation'
 import UserList from '@/app/room/[id]/UserList'
+import { Channel, Unsubscribe } from '@/app/room/[id]/function/Channel'
 
 export default function Room(props: { userId: string; roomId: string }) {
   const router = useRouter()
@@ -34,31 +36,26 @@ export default function Room(props: { userId: string; roomId: string }) {
     }>
   >([])
   const [pusherI, setPusherI] = useState<Pusher>()
-  const [channelI, setChannelI] = useState<Pusher>()
+  // const [channelI, setChannelI] = useState<Pusher>()
   const [roomMasterId, setRoomMasterId] = useState<string>('')
   const [voiceOnUser, setVoiceOnUser] = useState<Array<string>>([])
   const [phase, setPhase] = useState<number>(0)
+  const [remainingTime, setRemainingTime] = useState<number>(30)
   const [situation, setSituation] = useState<boolean>(true)
   useEffect(() => {
-    const pusherConnect = new Pusher(
-      String(process.env.NEXT_PUBLIC_PUSHER_KEY),
-      {
-        cluster: String(process.env.NEXT_PUBLIC_PUSHER_CLUSTER),
-      },
-    )
-    setPusherI(pusherConnect)
-    setChannelI(pusherConnect.subscribe(`room${roomId}-channel`))
+    Channel(setPusherI)
     return () => {
       // アンマウント時にチャンネル購読を辞める
       if (!pusherI) return
+      Unsubscribe(pusherI, roomId)
       pusherI.unsubscribe(`room${roomId}-channel`)
     }
   }, [])
   useEffect(() => {
     ;(async () => {
-      if (!pusherI || !channelI) return
-      // const channel = pusherI.subscribe(`room${roomId}-channel`)
-      channelI.bind(
+      if (!pusherI) return
+      const channel = pusherI.subscribe(`room${roomId}-channel`)
+      channel.bind(
         `room${roomId}-event`,
         (data: {
           users: Array<{
@@ -77,20 +74,21 @@ export default function Room(props: { userId: string; roomId: string }) {
           setUsers(data.users)
         },
       )
-      channelI.bind(
+      channel.bind(
         `room-voice-${roomId}-event`,
         (data: { voice_user_id: Array<string> }) => {
           setVoiceOnUser(data.voice_user_id)
         },
       )
-      channelI.bind(
+      channel.bind(
         `room-phase-${roomId}-event`,
         (data: { roomId: string; phase: number }) => {
+          console.log(remainingTime)
           setPhase(data.phase)
           setPositionSelectModalOpen(data.phase === 1)
         },
       )
-      channelI.bind(
+      channel.bind(
         `room-confirmed-${roomId}-event`,
         (data: { roomId: string; confirmed: boolean }) => {
           if (data.confirmed) {
@@ -99,7 +97,7 @@ export default function Room(props: { userId: string; roomId: string }) {
           }
         },
       )
-      channelI.bind(
+      channel.bind(
         `room-situation-${roomId}-event`,
         (data: { roomId: string; situation: boolean }) => {
           setSituation(data.situation)
@@ -120,12 +118,14 @@ export default function Room(props: { userId: string; roomId: string }) {
         }),
       })
       const room = await res.json()
+      console.log(room.selectPositionRemainTime)
+      setRemainingTime(room.selectPositionRemainTime)
       // setP
       setRoomMasterId(room.master_user_id)
     })()
   }, [pusherI])
 
-  if (!pusherI || !channelI) return <div />
+  if (!pusherI) return <div />
   return (
     <div className="h-screen">
       {roomMasterId && (
@@ -136,6 +136,14 @@ export default function Room(props: { userId: string; roomId: string }) {
             setSelectedPlayer={setSelectedPlayer}
             setPlayerInformationModalOpen={setPlayerInformationModalOpen}
           />
+          <RoomOperation
+            userId={userId}
+            roomId={roomId}
+            setPositionSelectModalOpen={setPositionSelectModalOpen}
+            phase={phase}
+            roomMasterId={roomMasterId}
+            voiceOnUser={voiceOnUser}
+          />
           {phase === 0 && (
             <RoomOperation
               userId={userId}
@@ -143,6 +151,7 @@ export default function Room(props: { userId: string; roomId: string }) {
               setPositionSelectModalOpen={setPositionSelectModalOpen}
               phase={phase}
               roomMasterId={roomMasterId}
+              voiceOnUser={voiceOnUser}
             />
           )}
         </>
@@ -281,7 +290,9 @@ export default function Room(props: { userId: string; roomId: string }) {
           setPositionSelectModalOpen={setPositionSelectModalOpen}
           userId={userId}
           roomId={roomId}
-          channelI={channelI}
+          remainingTime={remainingTime}
+          setRemainingTime={setRemainingTime}
+          // channelI={channelI}
         />
       )}
       {phase === 2 && (
@@ -289,8 +300,10 @@ export default function Room(props: { userId: string; roomId: string }) {
           situation={situation}
           users={users}
           userId={userId}
-          channelI={channelI}
+          // channelI={channelI}
           roomId={roomId}
+          remainingTime={remainingTime}
+          setRemainingTime={setRemainingTime}
         />
       )}
     </div>

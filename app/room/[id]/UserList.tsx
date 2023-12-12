@@ -33,9 +33,9 @@ export default function UserList(props: {
     <div>
       <div className="grid grid-cols-4 gap-4 min-h-[50%]">
         {users.map((data, index) => (
-          <div>
+          <div key={data.name}>
             {data.is_alive ? (
-              <div className="text-center" key={data.name}>
+              <div className="text-center">
                 <Typography
                   variant="body1"
                   className={`${
