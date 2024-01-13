@@ -50,7 +50,7 @@ export default function EnhancedTable(props: {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Paper className="p-2 rounded-none">
+      <Paper className="p-2 rounded-none opacity-90">
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}

@@ -137,6 +137,7 @@ export default function PositionSelectModal(props: {
         castId,
       }),
     })
+    setRemainingTime(30)
   }
   return (
     <div>
@@ -171,7 +172,7 @@ export default function PositionSelectModal(props: {
                       onClick={() => selectPosition(data.id)}
                       className="p-0">
                       <Image
-                        src={`/images/position/${data.id}.png`}
+                        src={`/images/position/${data.id}.jpeg`}
                         alt="Picture of the author"
                         width={100}
                         height={100}
@@ -203,7 +204,7 @@ export default function PositionSelectModal(props: {
               <Image
                 src={`/images/position/${
                   position[decisionPosition - 1].id
-                }.png`}
+                }.jpeg`}
                 alt="Picture of the author"
                 width={100}
                 height={100}

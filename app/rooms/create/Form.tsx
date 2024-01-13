@@ -36,7 +36,7 @@ export default function Form(props: { user: User }) {
     router.push(`/room/${room.roomId}`)
   }
   return (
-    <Paper className="p-4 w-6/12 my-1 mx-auto rounded-none">
+    <Paper className="p-4 w-6/12 my-1 mx-auto rounded-none opacity-90">
       <div className="">
         <div className="my-2">
           <Typography

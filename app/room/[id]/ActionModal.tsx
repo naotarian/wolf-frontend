@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import { Button } from '@mui/material'
 
@@ -46,11 +46,18 @@ export default function ActionModal(props: {
     count,
     remainingTime,
   } = props
+
   const [countTime, setCountTime] = useState<number>(30)
   const [resultText, setResultText] = useState<string>('')
   useCountDownInterval(countTime, setCountTime)
   const handleClose = () => setActionModalOpen(false)
-  const telling = user => {
+  const telling = (user: {
+    name: string
+    id: string
+    character_id: number
+    is_alive: boolean
+    position: number
+  }) => {
     console.log(user)
     let result = 'ではありませんでした。'
     if (user.character_id === 2) {
@@ -69,7 +76,19 @@ export default function ActionModal(props: {
     if (positionId === 2) {
       return (
         <div className="flex gap-4">
-          <Typography>じんろう</Typography>
+          <Typography variant="h2">どのプレイヤーを殺害しますか？</Typography>
+          <div className="flex gap-4">
+            {aliveUser.map((data, index) => (
+              <div key={index}>
+                <Button
+                  variant="contained"
+                  className="rounded-none"
+                  onClick={() => telling(data)}>
+                  {data.name}
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
       )
     }
@@ -79,7 +98,7 @@ export default function ActionModal(props: {
           <Typography variant="h2">どのプレイヤーを占いますか？</Typography>
           <div className="flex gap-4">
             {aliveUser.map((data, index) => (
-              <div>
+              <div key={index}>
                 <Button
                   variant="contained"
                   className="rounded-none"
@@ -95,12 +114,12 @@ export default function ActionModal(props: {
     }
   }
 
-  // useEffect(() => {
-  //   ;(async () => {
-  //     if (countTime !== 0) return
-  //     // console.log(countTime)
-  //   })()
-  // }, [countTime])
+  useEffect(() => {
+    ;(async () => {
+      if (remainingTime !== 0) return
+      console.log('0になった')
+    })()
+  }, [remainingTime])
   return (
     <div>
       <Modal

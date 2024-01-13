@@ -13,7 +13,6 @@ export default function Night(props: {
     is_alive: boolean
     position: number
   }>
-  // channelI: Pusher
   roomId: string
   remainingTime: number
   setRemainingTime: React.Dispatch<React.SetStateAction<number>>
@@ -61,7 +60,6 @@ export default function Night(props: {
         setActionModalOpen={setActionModalOpen}
         positionId={positionId}
         aliveUser={aliveUser}
-        // channelI={channelI}
         count={count}
         remainingTime={remainingTime}
       />

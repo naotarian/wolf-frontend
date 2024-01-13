@@ -44,12 +44,11 @@ export default function Form() {
         sm={4}
         md={7}
         sx={{
-          backgroundImage: 'url(https://source.unsplash.com/random?wallpapers)',
+          backgroundImage: `url(/images/thumbnails/thumbnail${(
+            '00' +
+            (Math.floor(Math.random() * 4) + 1)
+          ).slice(-2)}.jpeg)`,
           backgroundRepeat: 'no-repeat',
-          backgroundColor: t =>
-            t.palette.mode === 'light'
-              ? t.palette.grey[50]
-              : t.palette.grey[900],
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}

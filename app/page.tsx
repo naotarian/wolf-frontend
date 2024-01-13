@@ -3,7 +3,7 @@ import { auth } from '@/functions/common/auth'
 export default async function Home() {
   const user = await auth()
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center justify-between p-24 bg-[url('/images/top/top_background01.jpeg')]">
       <p className="m-0 max-w-[30ch] text-lg text-white">
         待っていたぞ{user.name}
       </p>

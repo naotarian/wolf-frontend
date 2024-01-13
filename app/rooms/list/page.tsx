@@ -10,7 +10,7 @@ export default async function Home() {
   const res = await fetch(baseUrl + url)
   const list = await res.json()
   return (
-    <main className="min-h-screen flex-col items-center justify-between p-24">
+    <main className="min-h-screen flex-col items-center justify-between p-24 bg-[url('/images/top/top_background03.jpeg')]">
       {user && <List list={list} />}
     </main>
   )

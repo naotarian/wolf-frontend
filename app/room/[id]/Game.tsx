@@ -15,15 +15,8 @@ export default function Game(props: {
   remainingTime: number
   setRemainingTime: React.Dispatch<React.SetStateAction<number>>
 }) {
-  const {
-    situation,
-    userId,
-    users,
-    // channelI,
-    roomId,
-    remainingTime,
-    setRemainingTime,
-  } = props
+  const { situation, userId, users, roomId, remainingTime, setRemainingTime } =
+    props
   const positionId = users.find(e => e.id === userId)
   const aliveUser = users.filter(user => user.is_alive !== false)
   return (
@@ -32,7 +25,6 @@ export default function Game(props: {
         <Night
           positionId={positionId.position}
           aliveUser={aliveUser}
-          // channelI={channelI}
           roomId={roomId}
           remainingTime={remainingTime}
           setRemainingTime={setRemainingTime}
